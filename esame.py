@@ -14,54 +14,63 @@ class CSVTimeSeriesFile:
     def get_data(self):  
         data = [] # lista in cui verranno salvate le liste ["data", n_passengers]
         
-        try: # Primo blocco try, test sull'apertura del file
-            with open(self.name, 'r') as file:
-                open_file = csv.reader(file)
-                prev_ts = None
-                
-                # Si creano delle tuple (indice, contenuto) con l'indice della riga su cui si sta lavorando e il rispettivo contenuto
-                for i, line in enumerate(open_file):
-                    
-                    # Controlliamo che ci sia un'intestazione:
-                    if i == 0:
-                        try: # Secondo blocco try: test sull'intestazione
-                            datetime.strptime(line[0], "%Y-%m") # Se si riesce a ricavare la data, allora non c'è un'intestazione
-                        except ValueError:
-                            continue # Se c'è, si salta la prima riga
-                    
-                    # Per ogni altra riga, si verifica se la riga sia vuota (not line) oppure se abbia meno di due elementi (quindi un campo vuoto):
-                    if not line or len(line) < 2: 
-                        continue 
-                    
-                    try: # Terzo blocco try: test sul resto del documento
-                        date = line[0]
-                        date = datetime.strptime(date, "%Y-%m")
-                        # print(date)
-                        
-                        n_passengers = int(line[1])
-
-                        # Gestione delle eccezioni e warning sui contenuti del file csv:
-                        if prev_ts is not None and date < prev_ts: # Timestamp mal ordinato
-                            raise ExamException(f'Il timestamp {date.strftime('%Y-%m')} è fuori ordine!')
-                    
-                        elif prev_ts is not None and date == prev_ts: # Timestamp duplicato
-                            raise ExamException(f'Il timestamp {date.strftime('%Y-%m')} è duplicato!')
-                        
-                        elif date >= datetime.today(): # Timestamp che indica una data futura?
-                            print('Warning: è stata inserita una data del futuro?!')
-                            
-                        prev_ts = date
-
-                        # Se i dati contenuti nella riga erano corretti, si ritrasforma la data in stringa e si salva la lista:
-                        date = date.strftime("%Y-%m")
-                        data.append([date, n_passengers])
-                    
-                    except ValueError:
-                        continue # Se il numero di passeggeri non è un intero positivo (o qualsiasi altra cosa), si salta e si continua senza sollevare eccezioni
+        # Test: si verifica se esista o se sia leggibile il file.
+        try:
+            file = open(self.name, 'r')
             
-        except FileNotFoundError: 
-            self.can_read = False
-            raise ExamException(f'Il file {self.name} non esiste o non è leggibile!')
+        except FileNotFoundError:
+            raise ExamException(f'Il file {self.name} non esiste!')
+        
+        except OSError:
+            raise ExamException(f'Il file {self.name} non è leggibile!')
+        
+        try: # Primo blocco try, test sull'apertura del file CSV
+        
+            open_file = csv.reader(file)
+            prev_ts = None
+            
+            # Si creano delle tuple (indice, contenuto) con l'indice della riga su cui si sta lavorando e il rispettivo contenuto
+            for i, line in enumerate(open_file):
+                
+                # Controlliamo che ci sia un'intestazione:
+                if i == 0:
+                    try: # Secondo blocco try: test sull'intestazione
+                        datetime.strptime(line[0], "%Y-%m") # Se si riesce a ricavare la data, allora non c'è un'intestazione
+                    except ValueError:
+                        continue # Se c'è, si salta la prima riga
+                
+                # Per ogni altra riga, si verifica se la riga sia vuota (not line) oppure se abbia meno di due elementi (quindi un campo vuoto):
+                if not line or len(line) < 2: 
+                    continue 
+                
+                try: # Terzo blocco try: test sul resto del documento
+                    date = line[0]
+                    date = datetime.strptime(date, "%Y-%m")
+                    # print(date)
+                    
+                    n_passengers = int(line[1])
+
+                    # Gestione delle eccezioni e warning sui contenuti del file csv:
+                    if prev_ts is not None and date < prev_ts: # Timestamp mal ordinato
+                        raise ExamException(f'Il timestamp {date.strftime('%Y-%m')} è fuori ordine!')
+                
+                    elif prev_ts is not None and date == prev_ts: # Timestamp duplicato
+                        raise ExamException(f'Il timestamp {date.strftime('%Y-%m')} è duplicato!')
+                    
+                    elif date >= datetime.today(): # Timestamp che indica una data futura?
+                        print('Warning: è stata inserita una data del futuro?!')
+                        
+                    prev_ts = date
+
+                    # Se i dati contenuti nella riga erano corretti, si ritrasforma la data in stringa e si salva la lista:
+                    date = date.strftime("%Y-%m")
+                    data.append([date, n_passengers])
+                
+                except ValueError:
+                    continue # Se il numero di passeggeri non è un intero positivo (o qualsiasi altra cosa), si salta e si continua senza sollevare eccezioni
+                
+        except csv.Error:
+            raise ExamException(f'Errore nella lettura del file CSV {self.name}!')
                       
         return data
             
@@ -116,6 +125,7 @@ def detect_similar_monthly_variations(time_series, years):
     
     variations = []
     for i in range(11): # si controlla Gen-Feb, Feb-Mar... etc
+        # Si fissano a None (così se non cambiano, significa che il valore non era presente e può essere fissato)
         var1 = None
         var2 = None
         
