@@ -116,6 +116,7 @@ def detect_similar_monthly_variations(time_series, years):
                 yearly_data[year] = [None] * 12
                 
             # Si converte il mese in un indice della lista (perché nella lista ci sono 11 elementi come le coppie di mesi) 
+            # e si popola quel mese con i dati a disposizione
             yearly_data[year][month-1] = line[1]
     
     for year in years:
