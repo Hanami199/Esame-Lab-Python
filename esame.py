@@ -24,7 +24,7 @@ class CSVTimeSeriesFile:
         except OSError:
             raise ExamException(f'Il file {self.name} non è leggibile!')
         
-        try: # Primo blocco try, test sull'apertura del file CSV
+        try: # Test sull'apertura del file CSV
         
             open_file = csv.reader(file)
             prev_ts = None
