@@ -151,10 +151,10 @@ def detect_similar_monthly_variations(time_series, years):
     return variations
         
         
-time_series_file = CSVTimeSeriesFile(name='culo.csv')
+# time_series_file = CSVTimeSeriesFile(name='data.csv')
 # time_series = time_series_file.get_data()
 # print(time_series)  
 # print("\n\n")
-years = [1951, 1952]
-print(detect_similar_monthly_variations(time_series_file.get_data(), years))
+# years = [1951, 1952]
+# print(detect_similar_monthly_variations(time_series_file.get_data(), years))
 
