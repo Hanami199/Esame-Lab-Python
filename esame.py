@@ -10,13 +10,11 @@ class CSVTimeSeriesFile:
     def __init__(self, name):
         self.name = name
 
-             
-
     # get_data prende in input il file CSV e trasforma il contenuto in una lista di liste con ["data", numero di passeggeri] 
     def get_data(self):  
         data = [] # lista in cui verranno salvate le liste ["data", n_passengers]
         
-        try:
+        try: # Primo blocco try, test sull'apertura del file
             with open(self.name, 'r') as file:
                 open_file = csv.reader(file)
                 prev_ts = None
@@ -26,7 +24,7 @@ class CSVTimeSeriesFile:
                     
                     # Controlliamo che ci sia un'intestazione:
                     if i == 0:
-                        try:
+                        try: # Secondo blocco try: test sull'intestazione
                             datetime.strptime(line[0], "%Y-%m") # Se si riesce a ricavare la data, allora non c'è un'intestazione
                         except ValueError:
                             continue # Se c'è, si salta la prima riga
@@ -35,7 +33,7 @@ class CSVTimeSeriesFile:
                     if not line or len(line) < 2: 
                         continue 
                     
-                    try:
+                    try: # Terzo blocco try: test sul resto del documento
                         date = line[0]
                         date = datetime.strptime(date, "%Y-%m")
                         # print(date)
